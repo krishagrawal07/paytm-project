@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import DataTable from "../components/DataTable";
 import PageHeader from "../components/PageHeader";
@@ -18,6 +18,8 @@ const Payments = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const formRef = useRef(null);
+  const isEditMode = editingId !== null;
 
   const fetchPayments = async () => {
     try {
@@ -73,7 +75,7 @@ const Payments = () => {
 
     try {
       setSubmitting(true);
-      if (editingId) {
+      if (isEditMode) {
         await axiosInstance.put(`/payments/${editingId}`, payload);
         setSuccessMessage("Payment updated successfully.");
       } else {
@@ -82,7 +84,7 @@ const Payments = () => {
       }
 
       resetForm();
-      fetchPayments();
+      await fetchPayments();
     } catch (apiError) {
       setError(apiError.response?.data?.message || "Failed to save payment.");
     } finally {
@@ -100,6 +102,9 @@ const Payments = () => {
       payment_status: payment.payment_status || "Success",
       payment_date: payment.payment_date ? String(payment.payment_date).slice(0, 10) : "",
     });
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
 
   const handleDelete = async (id) => {
@@ -111,7 +116,7 @@ const Payments = () => {
       setSuccessMessage("");
       await axiosInstance.delete(`/payments/${id}`);
       setSuccessMessage("Payment deleted successfully.");
-      fetchPayments();
+      await fetchPayments();
     } catch (apiError) {
       setError(apiError.response?.data?.message || "Failed to delete payment.");
     }
@@ -138,9 +143,9 @@ const Payments = () => {
         </p>
       ) : null}
 
-      <div className="mb-6 rounded-lg bg-white p-5 shadow-sm">
+      <div ref={formRef} className="mb-6 rounded-lg bg-white p-5 shadow-sm">
         <h3 className="mb-4 text-lg font-bold text-slate-800">
-          {editingId ? "Edit Payment" : "Add Payment"}
+          {isEditMode ? "Edit Payment" : "Add Payment"}
         </h3>
 
         <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -188,9 +193,9 @@ const Payments = () => {
               disabled={submitting}
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-70"
             >
-              {submitting ? "Saving..." : editingId ? "Update Payment" : "Add Payment"}
+              {submitting ? "Saving..." : isEditMode ? "Update Payment" : "Add Payment"}
             </button>
-            {editingId ? (
+            {isEditMode ? (
               <button
                 type="button"
                 onClick={resetForm}

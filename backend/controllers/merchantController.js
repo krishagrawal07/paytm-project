@@ -1,17 +1,19 @@
-const pool = require("../config/db");
-const { sendSuccess, sendError } = require("../middleware/errorMiddleware");
+import pool from "../config/db.js";
+import { sendSuccess, sendError } from "../middleware/errorMiddleware.js";
 
 const parseId = (id) => {
-  const parsedId = Number.parseInt(id, 10);
-  return Number.isNaN(parsedId) ? null : parsedId;
+  const parsed = Number.parseInt(id, 10);
+  return Number.isNaN(parsed) ? null : parsed;
 };
+
+const normalizeText = (value) => (typeof value === "string" ? value.trim() : "");
+
+const isEmailValid = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 const getAllMerchants = async (req, res, next) => {
   try {
-    const [merchants] = await pool.query(
-      "SELECT * FROM merchants ORDER BY merchant_id DESC"
-    );
-    return sendSuccess(res, "Merchants fetched successfully", merchants);
+    const [rows] = await pool.query("SELECT * FROM merchants ORDER BY merchant_id DESC");
+    return sendSuccess(res, "Merchants fetched successfully", rows);
   } catch (error) {
     return next(error);
   }
@@ -24,15 +26,12 @@ const getMerchantById = async (req, res, next) => {
       return sendError(res, "Invalid merchant ID", null, 400);
     }
 
-    const [merchants] = await pool.query(
-      "SELECT * FROM merchants WHERE merchant_id = ?",
-      [merchantId]
-    );
-    if (merchants.length === 0) {
+    const [rows] = await pool.query("SELECT * FROM merchants WHERE merchant_id = ?", [merchantId]);
+    if (!rows.length) {
       return sendError(res, "Merchant not found", null, 404);
     }
 
-    return sendSuccess(res, "Merchant fetched successfully", merchants[0]);
+    return sendSuccess(res, "Merchant fetched successfully", rows[0]);
   } catch (error) {
     return next(error);
   }
@@ -40,42 +39,36 @@ const getMerchantById = async (req, res, next) => {
 
 const createMerchant = async (req, res, next) => {
   try {
-    const { merchant_name, category, email, phone, address } = req.body;
+    const merchant_name = normalizeText(req.body?.merchant_name);
+    const category = normalizeText(req.body?.category);
+    const email = normalizeText(req.body?.email).toLowerCase();
+    const phone = normalizeText(req.body?.phone);
+    const address = normalizeText(req.body?.address);
 
     if (!merchant_name || !category || !email) {
-      return sendError(
-        res,
-        "merchant_name, category and email are required",
-        null,
-        400
-      );
+      return sendError(res, "merchant_name, category and email are required", null, 400);
     }
 
-    const [existingMerchants] = await pool.query(
+    if (!isEmailValid(email)) {
+      return sendError(res, "Please provide a valid email", null, 400);
+    }
+
+    const [duplicateRows] = await pool.query(
       "SELECT merchant_id FROM merchants WHERE email = ?",
       [email]
     );
-    if (existingMerchants.length > 0) {
+    if (duplicateRows.length > 0) {
       return sendError(res, "Email already exists", null, 400);
     }
 
-    const [insertResult] = await pool.query(
+    const [result] = await pool.query(
       `INSERT INTO merchants (merchant_name, category, email, phone, address)
        VALUES (?, ?, ?, ?, ?)`,
       [merchant_name, category, email, phone || null, address || null]
     );
 
-    const [createdMerchant] = await pool.query(
-      "SELECT * FROM merchants WHERE merchant_id = ?",
-      [insertResult.insertId]
-    );
-
-    return sendSuccess(
-      res,
-      "Merchant created successfully",
-      createdMerchant[0],
-      201
-    );
+    const [createdRows] = await pool.query("SELECT * FROM merchants WHERE merchant_id = ?", [result.insertId]);
+    return sendSuccess(res, "Merchant created successfully", createdRows[0], 201);
   } catch (error) {
     return next(error);
   }
@@ -88,30 +81,33 @@ const updateMerchant = async (req, res, next) => {
       return sendError(res, "Invalid merchant ID", null, 400);
     }
 
-    const { merchant_name, category, email, phone, address } = req.body;
+    const merchant_name = normalizeText(req.body?.merchant_name);
+    const category = normalizeText(req.body?.category);
+    const email = normalizeText(req.body?.email).toLowerCase();
+    const phone = normalizeText(req.body?.phone);
+    const address = normalizeText(req.body?.address);
 
     if (!merchant_name || !category || !email) {
-      return sendError(
-        res,
-        "merchant_name, category and email are required",
-        null,
-        400
-      );
+      return sendError(res, "merchant_name, category and email are required", null, 400);
     }
 
-    const [merchantRows] = await pool.query(
+    if (!isEmailValid(email)) {
+      return sendError(res, "Please provide a valid email", null, 400);
+    }
+
+    const [existingRows] = await pool.query(
       "SELECT merchant_id FROM merchants WHERE merchant_id = ?",
       [merchantId]
     );
-    if (merchantRows.length === 0) {
+    if (!existingRows.length) {
       return sendError(res, "Merchant not found", null, 404);
     }
 
-    const [duplicateEmailRows] = await pool.query(
+    const [duplicateRows] = await pool.query(
       "SELECT merchant_id FROM merchants WHERE email = ? AND merchant_id != ?",
       [email, merchantId]
     );
-    if (duplicateEmailRows.length > 0) {
+    if (duplicateRows.length > 0) {
       return sendError(res, "Email already exists", null, 400);
     }
 
@@ -122,12 +118,8 @@ const updateMerchant = async (req, res, next) => {
       [merchant_name, category, email, phone || null, address || null, merchantId]
     );
 
-    const [updatedMerchant] = await pool.query(
-      "SELECT * FROM merchants WHERE merchant_id = ?",
-      [merchantId]
-    );
-
-    return sendSuccess(res, "Merchant updated successfully", updatedMerchant[0]);
+    const [updatedRows] = await pool.query("SELECT * FROM merchants WHERE merchant_id = ?", [merchantId]);
+    return sendSuccess(res, "Merchant updated successfully", updatedRows[0]);
   } catch (error) {
     return next(error);
   }
@@ -140,26 +132,15 @@ const deleteMerchant = async (req, res, next) => {
       return sendError(res, "Invalid merchant ID", null, 400);
     }
 
-    const [deleteResult] = await pool.query(
-      "DELETE FROM merchants WHERE merchant_id = ?",
-      [merchantId]
-    );
-    if (deleteResult.affectedRows === 0) {
+    const [result] = await pool.query("DELETE FROM merchants WHERE merchant_id = ?", [merchantId]);
+    if (result.affectedRows === 0) {
       return sendError(res, "Merchant not found", null, 404);
     }
 
-    return sendSuccess(res, "Merchant deleted successfully", {
-      merchant_id: merchantId,
-    });
+    return sendSuccess(res, "Merchant deleted successfully", { merchant_id: merchantId });
   } catch (error) {
     return next(error);
   }
 };
 
-module.exports = {
-  getAllMerchants,
-  getMerchantById,
-  createMerchant,
-  updateMerchant,
-  deleteMerchant,
-};
+export { getAllMerchants, getMerchantById, createMerchant, updateMerchant, deleteMerchant };

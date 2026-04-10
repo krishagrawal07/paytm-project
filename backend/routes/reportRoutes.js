@@ -1,5 +1,5 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   topUsersTransactions,
   usersWithPayments,
   amazonTransactions2023,
@@ -10,7 +10,7 @@ const {
   highestAverageMerchant,
   usersMoreThan5Payments,
   merchantCommission,
-} = require("../controllers/reportController");
+} from "../controllers/reportController.js";
 
 const router = express.Router();
 
@@ -25,4 +25,4 @@ router.get("/highest-average-merchant", highestAverageMerchant);
 router.get("/users-more-than-5-payments", usersMoreThan5Payments);
 router.get("/merchant-commission", merchantCommission);
 
-module.exports = router;
+export default router;

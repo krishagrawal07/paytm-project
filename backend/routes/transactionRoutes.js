@@ -1,11 +1,11 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   getAllTransactions,
   getTransactionById,
   createTransaction,
   updateTransaction,
   deleteTransaction,
-} = require("../controllers/transactionController");
+} from "../controllers/transactionController.js";
 
 const router = express.Router();
 
@@ -15,4 +15,4 @@ router.post("/", createTransaction);
 router.put("/:id", updateTransaction);
 router.delete("/:id", deleteTransaction);
 
-module.exports = router;
+export default router;

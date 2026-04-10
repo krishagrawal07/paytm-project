@@ -1,58 +1,104 @@
 USE paytm_db;
 
-INSERT INTO users (user_id, first_name, last_name, email, phone, address, city, state, country) VALUES
-(1, 'Aarav', 'Sharma', 'aarav.sharma@example.com', '9876500001', '12 MG Road', 'Bengaluru', 'Karnataka', 'India'),
-(2, 'Diya', 'Mehta', 'diya.mehta@example.com', '9876500002', '45 Park Street', 'Kolkata', 'West Bengal', 'India'),
-(3, 'Rohan', 'Singh', 'rohan.singh@example.com', '9876500003', '88 Civil Lines', 'Lucknow', 'Uttar Pradesh', 'India'),
-(4, 'Ananya', 'Gupta', 'ananya.gupta@example.com', '9876500004', '5 Lake View', 'Pune', 'Maharashtra', 'India'),
-(5, 'Kabir', 'Verma', 'kabir.verma@example.com', '9876500005', '31 Green Park', 'Delhi', 'Delhi', 'India'),
-(6, 'Isha', 'Nair', 'isha.nair@example.com', '9876500006', '9 Marine Drive', 'Mumbai', 'Maharashtra', 'India');
+INSERT INTO users (first_name, last_name, email, phone, address, city, state, country) VALUES
+('Amit', 'Sharma', 'amit@gmail.com', '9876543210', 'Street 1', 'Delhi', 'Delhi', 'India'),
+('Priya', 'Verma', 'priya@gmail.com', '9876543211', 'Street 2', 'Mumbai', 'Maharashtra', 'India'),
+('Rahul', 'Singh', 'rahul@gmail.com', '9876543212', 'Street 3', 'Lucknow', 'UP', 'India'),
+('Neha', 'Gupta', 'neha@gmail.com', '9876543213', 'Street 4', 'Jaipur', 'Rajasthan', 'India'),
+('Karan', 'Mehta', 'karan@gmail.com', '9876543214', 'Street 5', 'Pune', 'Maharashtra', 'India'),
+('Sneha', 'Patel', 'sneha@gmail.com', '9876543215', 'Street 6', 'Ahmedabad', 'Gujarat', 'India'),
+('Rohit', 'Yadav', 'rohit@gmail.com', '9876543216', 'Street 7', 'Kanpur', 'UP', 'India'),
+('Anjali', 'Kapoor', 'anjali@gmail.com', '9876543217', 'Street 8', 'Chandigarh', 'Punjab', 'India'),
+('Vikas', 'Mishra', 'vikas@gmail.com', '9876543218', 'Street 9', 'Bhopal', 'MP', 'India'),
+('Pooja', 'Nair', 'pooja@gmail.com', '9876543219', 'Street 10', 'Kochi', 'Kerala', 'India');
 
-INSERT INTO merchants (merchant_id, merchant_name, category, email, phone, address) VALUES
-(1, 'Amazon', 'E-commerce', 'support@amazon.in', '180030001', 'Amazon India HQ'),
-(2, 'Zomato', 'Food Delivery', 'help@zomato.com', '180030002', 'Zomato HQ'),
-(3, 'Flipkart', 'E-commerce', 'care@flipkart.com', '180030003', 'Flipkart Campus'),
-(4, 'Swiggy', 'Food Delivery', 'help@swiggy.in', '180030004', 'Swiggy Office'),
-(5, 'LocalMart', 'Retail', 'contact@localmart.com', '180030005', 'LocalMart Center'),
-(6, 'NoTxn Merchant', 'Services', 'hello@notxn.com', '180030006', 'NoTxn Address');
+INSERT INTO merchants (merchant_name, category, email, phone, address) VALUES
+('Amazon', 'E-commerce', 'amazon@merchant.com', '9000000001', 'Bangalore'),
+('Zomato', 'Food', 'zomato@merchant.com', '9000000002', 'Gurgaon'),
+('Flipkart', 'E-commerce', 'flipkart@merchant.com', '9000000003', 'Bangalore'),
+('Swiggy', 'Food', 'swiggy@merchant.com', '9000000004', 'Bangalore'),
+('Myntra', 'E-commerce', 'myntra@merchant.com', '9000000005', 'Bangalore'),
+('Uber', 'Transport', 'uber@merchant.com', '9000000006', 'Mumbai'),
+('BookMyShow', 'Entertainment', 'bms@merchant.com', '9000000007', 'Mumbai'),
+('PayElectric', 'Utilities', 'electric@merchant.com', '9000000008', 'Delhi'),
+('NoTxnMart', 'Retail', 'notxn@merchant.com', '9000000009', 'Chennai');
 
-INSERT INTO accounts (account_id, user_id, account_number, account_type, balance, created_at) VALUES
-(1, 1, 'ACCT1001', 'Savings', 12000.00, '2023-01-10 10:00:00'),
-(2, 2, 'ACCT1002', 'Savings', 8500.00, '2023-02-11 11:30:00'),
-(3, 3, 'ACCT1003', 'Current', 23000.00, '2023-03-15 14:20:00'),
-(4, 4, 'ACCT1004', 'Savings', 5100.00, '2023-04-18 09:10:00'),
-(5, 5, 'ACCT1005', 'Current', 41000.00, '2023-05-20 13:05:00'),
-(6, 6, 'ACCT1006', 'Savings', 6400.00, '2023-06-25 16:40:00');
+INSERT INTO accounts (user_id, account_number, account_type, balance, created_at) VALUES
+(1, 'ACC1001', 'Savings', 50000.00, '2023-01-01'),
+(2, 'ACC1002', 'Savings', 40000.00, '2023-01-02'),
+(3, 'ACC1003', 'Current', 30000.00, '2023-01-03'),
+(4, 'ACC1004', 'Savings', 35000.00, '2023-01-04'),
+(5, 'ACC1005', 'Current', 60000.00, '2023-01-05'),
+(6, 'ACC1006', 'Savings', 25000.00, '2023-01-06'),
+(7, 'ACC1007', 'Savings', 45000.00, '2023-01-07'),
+(8, 'ACC1008', 'Current', 70000.00, '2023-01-08'),
+(9, 'ACC1009', 'Savings', 20000.00, '2023-01-09'),
+(10, 'ACC1010', 'Savings', 55000.00, '2023-01-10');
 
-INSERT INTO transactions (transaction_id, user_id, merchant_id, account_id, amount, transaction_type, transaction_status, transaction_date) VALUES
-(1, 1, 1, 1, 500.00, 'Purchase', 'Completed', '2023-01-15'),
-(2, 1, 1, 1, 1200.00, 'Purchase', 'Completed', '2023-02-20'),
-(3, 1, 2, 1, 350.00, 'Food', 'Completed', '2023-03-05'),
-(4, 1, 3, 1, 2400.00, 'Purchase', 'Completed', '2023-04-09'),
-(5, 1, 1, 1, 180.00, 'Purchase', 'Completed', '2023-05-01'),
-(6, 1, 4, 1, 220.00, 'Food', 'Completed', '2023-06-11'),
-(7, 1, 3, 1, 3300.00, 'Purchase', 'Completed', '2023-07-19'),
-(8, 1, 1, 1, 750.00, 'Purchase', 'Pending', '2023-08-23'),
-(9, 1, 2, 1, 410.00, 'Food', 'Completed', '2023-09-14'),
-(10, 1, 3, 1, 2900.00, 'Purchase', 'Completed', '2023-10-02'),
-(11, 1, 1, 1, 1300.00, 'Purchase', 'Completed', '2023-11-22'),
-(12, 2, 1, 2, 900.00, 'Purchase', 'Completed', '2023-12-12'),
-(13, 2, 2, 2, 280.00, 'Food', 'Completed', '2024-01-03'),
-(14, 2, 3, 2, 4500.00, 'Purchase', 'Completed', '2025-01-09'),
-(15, 3, 3, 3, 5200.00, 'Purchase', 'Completed', '2024-02-18'),
-(16, 3, 4, 3, 150.00, 'Food', 'Failed', '2024-03-22'),
-(17, 4, 5, 4, 300.00, 'Purchase', 'Completed', '2024-04-10'),
-(18, 5, 1, 5, 700.00, 'Purchase', 'Pending', '2025-05-14');
+INSERT INTO transactions (user_id, merchant_id, account_id, amount, transaction_type, transaction_status, transaction_date) VALUES
+(1, 1, 1, 1200.00, 'Payment', 'Completed', '2023-01-15'),
+(1, 2, 1, 500.00, 'Payment', 'Completed', '2023-02-10'),
+(1, 1, 1, 2500.00, 'Payment', 'Completed', '2023-03-05'),
+(1, 3, 1, 1800.00, 'Payment', 'Completed', '2023-04-12'),
+(1, 1, 1, 2200.00, 'Payment', 'Completed', '2023-05-20'),
+(1, 5, 1, 1600.00, 'Payment', 'Completed', '2023-06-11'),
+(1, 2, 1, 750.00, 'Payment', 'Completed', '2023-07-09'),
+(1, 6, 1, 320.00, 'Payment', 'Completed', '2023-08-15'),
+(1, 1, 1, 4100.00, 'Payment', 'Completed', '2023-09-25'),
+(1, 3, 1, 980.00, 'Payment', 'Completed', '2023-10-18'),
+(1, 7, 1, 650.00, 'Payment', 'Completed', '2023-11-12'),
+(1, 8, 1, 1200.00, 'Payment', 'Completed', '2023-12-01'),
 
-INSERT INTO payments (payment_id, transaction_id, payment_method, payment_status, payment_date) VALUES
-(1, 1, 'UPI', 'Success', '2023-01-15'),
-(2, 2, 'Card', 'Success', '2023-02-20'),
-(3, 3, 'Wallet', 'Success', '2023-03-05'),
-(4, 4, 'UPI', 'Success', '2023-04-09'),
-(5, 5, 'NetBanking', 'Success', '2023-05-01'),
-(6, 6, 'UPI', 'Success', '2023-06-11'),
-(7, 7, 'Card', 'Success', '2023-07-19'),
-(8, 12, 'UPI', 'Success', '2023-12-12'),
-(9, 13, 'Wallet', 'Success', '2024-01-03'),
-(10, 15, 'Card', 'Success', '2024-02-18'),
-(11, 17, 'UPI', 'Success', '2024-04-10');
+(2, 2, 2, 430.00, 'Payment', 'Completed', '2023-01-21'),
+(2, 1, 2, 2100.00, 'Payment', 'Completed', '2023-03-18'),
+(2, 4, 2, 600.00, 'Payment', 'Completed', '2023-04-20'),
+
+(3, 1, 3, 3200.00, 'Payment', 'Completed', '2023-02-14'),
+(3, 5, 3, 1500.00, 'Payment', 'Completed', '2023-05-25'),
+(3, 2, 3, 700.00, 'Payment', 'Completed', '2023-08-30'),
+
+(4, 6, 4, 450.00, 'Payment', 'Completed', '2023-06-10'),
+(4, 7, 4, 900.00, 'Payment', 'Failed', '2023-07-11'),
+
+(5, 1, 5, 5000.00, 'Payment', 'Completed', '2023-09-17'),
+(5, 3, 5, 2800.00, 'Payment', 'Completed', '2023-10-05'),
+(5, 2, 5, 650.00, 'Payment', 'Completed', '2023-10-21'),
+
+(6, 8, 6, 1100.00, 'Payment', 'Completed', '2023-03-09'),
+(6, 2, 6, 300.00, 'Payment', 'Completed', '2023-04-19'),
+
+(7, 4, 7, 550.00, 'Payment', 'Completed', '2023-11-23'),
+(8, 1, 8, 7200.00, 'Payment', 'Completed', '2023-12-14'),
+(9, 5, 9, 1300.00, 'Payment', 'Pending', '2023-12-20'),
+(10, 2, 10, 480.00, 'Payment', 'Completed', '2023-12-24');
+
+INSERT INTO payments (transaction_id, payment_method, payment_status, payment_date) VALUES
+(1, 'UPI', 'Success', '2023-01-15'),
+(2, 'Wallet', 'Success', '2023-02-10'),
+(3, 'Card', 'Success', '2023-03-05'),
+(4, 'UPI', 'Success', '2023-04-12'),
+(5, 'NetBanking', 'Success', '2023-05-20'),
+(6, 'Wallet', 'Success', '2023-06-11'),
+(7, 'UPI', 'Success', '2023-07-09'),
+(8, 'Card', 'Success', '2023-08-15'),
+(9, 'UPI', 'Success', '2023-09-25'),
+(10, 'Wallet', 'Success', '2023-10-18'),
+(11, 'UPI', 'Success', '2023-11-12'),
+(12, 'NetBanking', 'Success', '2023-12-01'),
+(13, 'Wallet', 'Success', '2023-01-21'),
+(14, 'UPI', 'Success', '2023-03-18'),
+(15, 'Card', 'Success', '2023-04-20'),
+(16, 'UPI', 'Success', '2023-02-14'),
+(17, 'Wallet', 'Success', '2023-05-25'),
+(18, 'UPI', 'Success', '2023-08-30'),
+(19, 'NetBanking', 'Success', '2023-06-10'),
+(20, 'Card', 'Failed', '2023-07-11'),
+(21, 'UPI', 'Success', '2023-09-17'),
+(22, 'Wallet', 'Success', '2023-10-05'),
+(23, 'UPI', 'Success', '2023-10-21'),
+(24, 'NetBanking', 'Success', '2023-03-09'),
+(25, 'Wallet', 'Success', '2023-04-19'),
+(26, 'UPI', 'Success', '2023-11-23'),
+(27, 'Card', 'Success', '2023-12-14'),
+(28, 'Wallet', 'Pending', '2023-12-20'),
+(29, 'UPI', 'Success', '2023-12-24');

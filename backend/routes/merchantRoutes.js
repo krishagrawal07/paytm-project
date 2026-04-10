@@ -1,11 +1,11 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   getAllMerchants,
   getMerchantById,
   createMerchant,
   updateMerchant,
   deleteMerchant,
-} = require("../controllers/merchantController");
+} from "../controllers/merchantController.js";
 
 const router = express.Router();
 
@@ -15,4 +15,4 @@ router.post("/", createMerchant);
 router.put("/:id", updateMerchant);
 router.delete("/:id", deleteMerchant);
 
-module.exports = router;
+export default router;

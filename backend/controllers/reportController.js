@@ -1,5 +1,5 @@
-const pool = require("../config/db");
-const { sendSuccess } = require("../middleware/errorMiddleware");
+import pool from "../config/db.js";
+import { sendSuccess } from "../middleware/errorMiddleware.js";
 
 const topUsersTransactions = async (req, res, next) => {
   try {
@@ -34,10 +34,11 @@ const usersWithPayments = async (req, res, next) => {
 const amazonTransactions2023 = async (req, res, next) => {
   try {
     const [rows] = await pool.query(
-      `SELECT t.transaction_id, t.user_id, t.merchant_id, t.account_id, t.amount, t.transaction_type, t.transaction_status, t.transaction_date, m.merchant_name
+      `SELECT DISTINCT t.*
        FROM transactions t
        JOIN merchants m ON t.merchant_id = m.merchant_id
-       WHERE m.merchant_name = 'Amazon' AND YEAR(t.transaction_date) = 2023
+       WHERE m.merchant_name = 'Amazon'
+         AND YEAR(t.transaction_date) = 2023
        ORDER BY t.transaction_date`
     );
     return sendSuccess(res, "Amazon transactions in 2023 fetched successfully", rows);
@@ -54,7 +55,7 @@ const userEmailTransaction = async (req, res, next) => {
        JOIN transactions t ON u.user_id = t.user_id
        ORDER BY t.transaction_id`
     );
-    return sendSuccess(res, "User email and transaction ID list fetched successfully", rows);
+    return sendSuccess(res, "User email and transaction ID report fetched successfully", rows);
   } catch (error) {
     return next(error);
   }
@@ -63,7 +64,7 @@ const userEmailTransaction = async (req, res, next) => {
 const merchantsNoTransactions = async (req, res, next) => {
   try {
     const [rows] = await pool.query(
-      `SELECT m.merchant_id, m.merchant_name, m.category
+      `SELECT DISTINCT m.merchant_id, m.merchant_name
        FROM merchants m
        LEFT JOIN transactions t ON m.merchant_id = t.merchant_id
        WHERE t.transaction_id IS NULL
@@ -78,13 +79,13 @@ const merchantsNoTransactions = async (req, res, next) => {
 const zomatoUsers = async (req, res, next) => {
   try {
     const [rows] = await pool.query(
-      `SELECT DISTINCT u.user_id, u.first_name, u.last_name, u.email
+      `SELECT DISTINCT u.user_id, u.first_name, u.last_name
        FROM users u
        JOIN transactions t ON u.user_id = t.user_id
        JOIN merchants m ON t.merchant_id = m.merchant_id
        JOIN payments p ON t.transaction_id = p.transaction_id
        WHERE m.merchant_name = 'Zomato'
-       ORDER BY u.last_name`
+       ORDER BY u.last_name, u.first_name`
     );
     return sendSuccess(res, "Users who made payments to Zomato fetched successfully", rows);
   } catch (error) {
@@ -95,18 +96,15 @@ const zomatoUsers = async (req, res, next) => {
 const ecommerceUsers = async (req, res, next) => {
   try {
     const [rows] = await pool.query(
-      `SELECT DISTINCT u.user_id, u.first_name, u.last_name, u.email
+      `SELECT DISTINCT m.merchant_id, u.first_name, u.last_name
        FROM users u
        JOIN transactions t ON u.user_id = t.user_id
        JOIN merchants m ON t.merchant_id = m.merchant_id
-       WHERE m.category = 'E-commerce' AND t.transaction_status = 'Completed'
-       ORDER BY u.user_id`
+       WHERE m.category = 'E-commerce'
+         AND t.transaction_status = 'Completed'
+       ORDER BY u.last_name, u.first_name`
     );
-    return sendSuccess(
-      res,
-      "Users who transacted with E-commerce merchants fetched successfully",
-      rows
-    );
+    return sendSuccess(res, "Users who transacted with E-commerce merchants fetched successfully", rows);
   } catch (error) {
     return next(error);
   }
@@ -115,26 +113,19 @@ const ecommerceUsers = async (req, res, next) => {
 const highestAverageMerchant = async (req, res, next) => {
   try {
     const [rows] = await pool.query(
-      `SELECT x.merchant_id, x.merchant_name, x.avg_transaction_value
-       FROM (
-         SELECT m.merchant_id, m.merchant_name, AVG(t.amount) AS avg_transaction_value
-         FROM merchants m
-         JOIN transactions t ON m.merchant_id = t.merchant_id
-         GROUP BY m.merchant_id, m.merchant_name
-       ) x
-       WHERE x.avg_transaction_value = (
-         SELECT MAX(avg_value) FROM (
-           SELECT AVG(amount) AS avg_value
+      `SELECT merchant_id, AVG(amount) AS avg_transaction
+       FROM transactions
+       GROUP BY merchant_id
+       HAVING AVG(amount) = (
+         SELECT MAX(avg_amt)
+         FROM (
+           SELECT AVG(amount) AS avg_amt
            FROM transactions
            GROUP BY merchant_id
-         ) y
+         ) AS temp
        )`
     );
-    return sendSuccess(
-      res,
-      "Merchant with highest average transaction fetched successfully",
-      rows
-    );
+    return sendSuccess(res, "Merchant with highest average transaction value fetched successfully", rows);
   } catch (error) {
     return next(error);
   }
@@ -143,13 +134,12 @@ const highestAverageMerchant = async (req, res, next) => {
 const usersMoreThan5Payments = async (req, res, next) => {
   try {
     const [rows] = await pool.query(
-      `SELECT u.user_id, u.first_name, u.last_name, COUNT(p.payment_id) AS total_payments
-       FROM users u
-       JOIN transactions t ON u.user_id = t.user_id
+      `SELECT t.user_id AS customer_id, COUNT(p.payment_id) AS payment_count
+       FROM transactions t
        JOIN payments p ON t.transaction_id = p.transaction_id
-       GROUP BY u.user_id, u.first_name, u.last_name
+       GROUP BY t.user_id
        HAVING COUNT(p.payment_id) > 5
-       ORDER BY total_payments DESC`
+       ORDER BY payment_count DESC`
     );
     return sendSuccess(res, "Users with more than 5 payments fetched successfully", rows);
   } catch (error) {
@@ -160,11 +150,10 @@ const usersMoreThan5Payments = async (req, res, next) => {
 const merchantCommission = async (req, res, next) => {
   try {
     const [rows] = await pool.query(
-      `SELECT m.merchant_id, m.merchant_name, SUM(t.amount * 0.02) AS total_commission
-       FROM merchants m
-       JOIN transactions t ON m.merchant_id = t.merchant_id
-       GROUP BY m.merchant_id, m.merchant_name
-       ORDER BY m.merchant_id`
+      `SELECT merchant_id, SUM(amount * 0.02) AS total_commission
+       FROM transactions
+       GROUP BY merchant_id
+       ORDER BY merchant_id`
     );
     return sendSuccess(res, "Merchant commission report fetched successfully", rows);
   } catch (error) {
@@ -172,7 +161,7 @@ const merchantCommission = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   topUsersTransactions,
   usersWithPayments,
   amazonTransactions2023,

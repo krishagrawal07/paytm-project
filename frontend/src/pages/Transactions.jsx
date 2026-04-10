@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import DataTable from "../components/DataTable";
 import PageHeader from "../components/PageHeader";
@@ -21,6 +21,8 @@ const Transactions = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const formRef = useRef(null);
+  const isEditMode = editingId !== null;
 
   const fetchTransactions = async () => {
     try {
@@ -46,8 +48,11 @@ const Transactions = () => {
 
   const validateForm = () => {
     if (!formData.user_id.trim()) return "User ID is required.";
+    if (Number.isNaN(Number(formData.user_id))) return "User ID must be a number.";
     if (!formData.merchant_id.trim()) return "Merchant ID is required.";
+    if (Number.isNaN(Number(formData.merchant_id))) return "Merchant ID must be a number.";
     if (!formData.account_id.trim()) return "Account ID is required.";
+    if (Number.isNaN(Number(formData.account_id))) return "Account ID must be a number.";
     if (!formData.amount.trim()) return "Amount is required.";
     if (Number.isNaN(Number(formData.amount))) return "Amount must be a number.";
     if (!formData.transaction_status.trim()) return "Transaction status is required.";
@@ -73,12 +78,15 @@ const Transactions = () => {
 
     const payload = {
       ...formData,
+      user_id: Number(formData.user_id),
+      merchant_id: Number(formData.merchant_id),
+      account_id: Number(formData.account_id),
       amount: Number(formData.amount),
     };
 
     try {
       setSubmitting(true);
-      if (editingId) {
+      if (isEditMode) {
         await axiosInstance.put(`/transactions/${editingId}`, payload);
         setSuccessMessage("Transaction updated successfully.");
       } else {
@@ -87,7 +95,7 @@ const Transactions = () => {
       }
 
       resetForm();
-      fetchTransactions();
+      await fetchTransactions();
     } catch (apiError) {
       setError(apiError.response?.data?.message || "Failed to save transaction.");
     } finally {
@@ -113,6 +121,9 @@ const Transactions = () => {
         ? String(transaction.transaction_date).slice(0, 10)
         : "",
     });
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
 
   const handleDelete = async (id) => {
@@ -124,7 +135,7 @@ const Transactions = () => {
       setSuccessMessage("");
       await axiosInstance.delete(`/transactions/${id}`);
       setSuccessMessage("Transaction deleted successfully.");
-      fetchTransactions();
+      await fetchTransactions();
     } catch (apiError) {
       setError(apiError.response?.data?.message || "Failed to delete transaction.");
     }
@@ -157,9 +168,9 @@ const Transactions = () => {
         </p>
       ) : null}
 
-      <div className="mb-6 rounded-lg bg-white p-5 shadow-sm">
+      <div ref={formRef} className="mb-6 rounded-lg bg-white p-5 shadow-sm">
         <h3 className="mb-4 text-lg font-bold text-slate-800">
-          {editingId ? "Edit Transaction" : "Add Transaction"}
+          {isEditMode ? "Edit Transaction" : "Add Transaction"}
         </h3>
 
         <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -228,9 +239,9 @@ const Transactions = () => {
               disabled={submitting}
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-70"
             >
-              {submitting ? "Saving..." : editingId ? "Update Transaction" : "Add Transaction"}
+              {submitting ? "Saving..." : isEditMode ? "Update Transaction" : "Add Transaction"}
             </button>
-            {editingId ? (
+            {isEditMode ? (
               <button
                 type="button"
                 onClick={resetForm}

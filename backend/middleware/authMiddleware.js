@@ -1,22 +1,23 @@
-const jwt = require("jsonwebtoken");
-const { sendError } = require("./errorMiddleware");
+import jwt from "jsonwebtoken";
+import { sendError } from "./errorMiddleware.js";
 
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers.authorization || "";
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!authHeader.startsWith("Bearer ")) {
     return sendError(res, "Unauthorized: token is missing", null, 401);
   }
 
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const jwtSecret = process.env.JWT_SECRET || "supersecretkey";
+    const decoded = jwt.verify(token, jwtSecret);
     req.admin = decoded;
-    next();
+    return next();
   } catch (error) {
     return sendError(res, "Unauthorized: invalid or expired token", null, 401);
   }
 };
 
-module.exports = authMiddleware;
+export default authMiddleware;

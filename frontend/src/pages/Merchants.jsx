@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import DataTable from "../components/DataTable";
 import PageHeader from "../components/PageHeader";
@@ -19,6 +19,8 @@ const Merchants = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const formRef = useRef(null);
+  const isEditMode = editingId !== null;
 
   const fetchMerchants = async () => {
     try {
@@ -68,7 +70,7 @@ const Merchants = () => {
 
     try {
       setSubmitting(true);
-      if (editingId) {
+      if (isEditMode) {
         await axiosInstance.put(`/merchants/${editingId}`, formData);
         setSuccessMessage("Merchant updated successfully.");
       } else {
@@ -77,7 +79,7 @@ const Merchants = () => {
       }
 
       resetForm();
-      fetchMerchants();
+      await fetchMerchants();
     } catch (apiError) {
       setError(apiError.response?.data?.message || "Failed to save merchant.");
     } finally {
@@ -96,6 +98,9 @@ const Merchants = () => {
       phone: merchant.phone || "",
       address: merchant.address || "",
     });
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
 
   const handleDelete = async (id) => {
@@ -107,7 +112,7 @@ const Merchants = () => {
       setSuccessMessage("");
       await axiosInstance.delete(`/merchants/${id}`);
       setSuccessMessage("Merchant deleted successfully.");
-      fetchMerchants();
+      await fetchMerchants();
     } catch (apiError) {
       setError(apiError.response?.data?.message || "Failed to delete merchant.");
     }
@@ -138,9 +143,9 @@ const Merchants = () => {
         </p>
       ) : null}
 
-      <div className="mb-6 rounded-lg bg-white p-5 shadow-sm">
+      <div ref={formRef} className="mb-6 rounded-lg bg-white p-5 shadow-sm">
         <h3 className="mb-4 text-lg font-bold text-slate-800">
-          {editingId ? "Edit Merchant" : "Add Merchant"}
+          {isEditMode ? "Edit Merchant" : "Add Merchant"}
         </h3>
 
         <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -191,9 +196,9 @@ const Merchants = () => {
               disabled={submitting}
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-70"
             >
-              {submitting ? "Saving..." : editingId ? "Update Merchant" : "Add Merchant"}
+              {submitting ? "Saving..." : isEditMode ? "Update Merchant" : "Add Merchant"}
             </button>
-            {editingId ? (
+            {isEditMode ? (
               <button
                 type="button"
                 onClick={resetForm}
