@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paytm Dashboard Entry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --paytm-blue: #00BAF2;
+            --paytm-dark-blue: #012b72;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-light: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        
+        .container { width: 100%; max-width: 800px; padding: 20px; text-align: center; }
+        
+        .paytm-logo {
+            font-weight: 800; font-size: 48px; letter-spacing: -2px; margin-bottom: 12px;
+        }
+        .pay { color: var(--paytm-dark-blue); }
+        .tm { color: var(--paytm-blue); }
+        
+        .page-subtitle { font-size: 16px; color: var(--text-secondary); margin-bottom: 48px; font-weight: 500; }
+
+        .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+        
+        .role-card {
+            background: #fff; border: 1px solid var(--border-light); border-radius: 20px;
+            padding: 40px 32px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; align-items: center; gap: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        
+        .role-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--paytm-blue);
+            box-shadow: 0 20px 25px -5px rgba(0, 186, 242, 0.1);
+        }
+
+        .role-card.active { border-color: var(--paytm-blue); background: #f0fbff; }
+
+        .icon-circle {
+            width: 64px; height: 64px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 24px;
+            transition: all 0.3s;
+        }
+        .admin-icon { background: #e0f2fe; color: #0284c7; }
+        .user-icon { background: #d1fae5; color: #059669; }
+
+        .role-card h3 { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+        .role-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+        /* Login Form Styles */
+        .login-form-area {
+            max-width: 400px; margin: 0 auto;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .input-group { text-align: left; margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 8px; }
+        .input-group input {
+            width: 100%; padding: 14px 16px; border: 1px solid #cbd5e1; border-radius: 12px;
+            font-size: 15px; outline: none; transition: all 0.2s;
+        }
+        .input-group input:focus { border-color: var(--paytm-blue); box-shadow: 0 0 0 4px rgba(0, 186, 242, 0.1); }
+
+        .btn-primary {
+            background: var(--paytm-blue); color: #fff; border: none; width: 100%; padding: 14px;
+            border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-primary:hover { background: #00a0d2; box-shadow: 0 10px 15px -3px rgba(0, 186, 242, 0.3); }
+
+        .error-msg { background: #fee2e2; color: #b91c1c; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; font-weight: 600; }
+        
+        .hidden { display: none; }
+
+        .back-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 20px; }
+        .back-btn:hover { color: var(--text-primary); }
+
+        /* Gmail Account Selector Styles */
+        .account-item {
+            display: flex; align-items: center; gap: 16px; padding: 12px 16px; 
+            cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f1f5f9;
+        }
+        .account-item:hover { background: #f8fafc; }
+        .account-item:last-child { border-bottom: none; }
+        
+        .account-avatar {
+            width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; 
+            color: #475569; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 14px;
+        }
+        .account-info h4 { font-size: 14px; font-weight: 600; color: #1e293b; margin: 0; }
+        .account-info p { font-size: 12px; color: #64748b; margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="paytm-logo">
+            <span class="pay">Pay</span><span class="tm">tm</span>
+        </div>
+        <p class="page-subtitle">DBMS Case Study Dashboard</p>
+
+        <!-- Role Selection -->
+        <div id="role-selection" class="role-grid">
+            <div class="role-card" id="card-admin">
+                <div class="icon-circle admin-icon"><i class="fa-solid fa-user-shield"></i></div>
+                <h3>Administrator</h3>
+                <p>Access database reports, academic queries, and system-wide settings.</p>
+            </div>
+            <div class="role-card" id="card-user">
+                <div class="icon-circle user-icon"><i class="fa-solid fa-user"></i></div>
+                <h3>Customer Portal</h3>
+                <p>Register new accounts, manage your wallet, and make secure payments.</p>
+            </div>
+        </div>
+
+        <!-- Admin Login Form (Hidden initially) -->
+        <div id="admin-login-form" class="login-form-area hidden">
+            <div class="login-wrapper">
+                <h3>Admin Auth</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px;">Please enter your secure access PIN.</p>
+                
+                {% if error %}
+                <div class="error-msg">{{ error }}</div>
+                {% endif %}
+
+                <form action="/login" method="POST">
+                    <input type="hidden" name="role" value="admin">
+                    <div class="input-group">
+                        <label>Secure PIN</label>
+                        <input type="password" name="pin" placeholder="••••••" required id="pin-input">
+                    </div>
+                    <button type="submit" class="btn-primary">Verify & Enter <i class="fa-solid fa-arrow-right"></i></button>
+                </form>
+                <button class="back-btn" id="btn-back-role"><i class="fa-solid fa-chevron-left"></i> Change Role</button>
+            </div>
+        </div>
+
+        <!-- User Entry & Registration Area -->
+        <div id="user-entry-action" class="login-form-area hidden" style="max-width: 420px;">
+            <!-- Login View -->
+            <div id="user-login-view" class="login-wrapper" style="padding: 40px; background: white; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+                <div class="icon-circle user-icon" style="margin: 0 auto 20px;"><i class="fa-solid fa-user-check"></i></div>
+                <h3 style="font-size: 22px; margin-bottom: 8px;">Select Account</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 30px;">Choose your email to access the Consumer Portal.</p>
+                
+                {% if error and request.form.get('role') == 'user' %}
+                <div class="error-msg">{{ error }}</div>
+                {% endif %}
+
+                <form id="email-select-form" action="/login" method="POST">
+                    <input type="hidden" name="role" value="user">
+                    <div class="input-group" style="margin-bottom: 24px; text-align: left;">
+                        <label style="font-size: 11px; font-weight: 700; color: var(--paytm-blue); text-transform: uppercase; margin-bottom: 8px; display: block;">Registered Email Address</label>
+                        <select name="email" id="user-email-select" required style="width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: 500; color: #1e293b; background: #f8fafc; cursor: pointer; transition: 0.2s;">
+                            <option value="">Fetching accounts...</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary" style="background: var(--paytm-blue);">Log In as User <i class="fa-solid fa-arrow-right"></i></button>
+                </form>
+
+                <p style="margin-top: 20px; font-size: 13px; color: var(--text-secondary);">
+                    New to Paytm? <a href="javascript:void(0)" id="link-show-register" style="color: var(--paytm-blue); font-weight: 700; text-decoration: none;">Create an Account</a>
+                </p>
+
+                <div style="margin-top: 24px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                    <button class="back-btn" id="btn-back-role-user" style="margin: 0;"><i class="fa-solid fa-chevron-left"></i> Change Role</button>
+                </div>
+            </div>
+
+            <!-- Registration View (Hidden initially) -->
+            <div id="user-register-view" class="login-wrapper hidden" style="padding: 40px; background: white; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+                <div class="icon-circle user-icon" style="margin: 0 auto 20px; background: #e0f2fe; color: #00BAF2;"><i class="fa-solid fa-user-plus"></i></div>
+                <h3 style="font-size: 22px; margin-bottom: 8px;">Join Paytm</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 30px;">Get a ₹5,000 joining bonus instantly!</p>
+                
+                <div id="reg-error" class="error-msg hidden"></div>
+
+                <div class="input-group" style="margin-bottom: 16px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label>First Name</label>
+                            <input type="text" id="reg-fname" placeholder="John" required>
+                        </div>
+                        <div>
+                            <label>Last Name</label>
+                            <input type="text" id="reg-lname" placeholder="Doe" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group" style="margin-bottom: 16px;">
+                    <label>Email Address</label>
+                    <input type="email" id="reg-email" placeholder="john@example.com" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 24px;">
+                    <label>Phone Number</label>
+                    <input type="text" id="reg-phone" placeholder="98XXXXXXXX" required>
+                </div>
+
+                <button id="btn-submit-register" class="btn-primary" style="background: var(--paytm-blue);">Create Account & Get Bonus <i class="fa-solid fa-gift"></i></button>
+
+                <p style="margin-top: 20px; font-size: 13px; color: var(--text-secondary);">
+                    Already have an account? <a href="javascript:void(0)" id="link-show-login" style="color: var(--paytm-blue); font-weight: 700; text-decoration: none;">Back to Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const cardAdmin = document.getElementById('card-admin');
+        const cardUser = document.getElementById('card-user');
+        const roleSelection = document.getElementById('role-selection');
+        const adminForm = document.getElementById('admin-login-form');
+        const userAction = document.getElementById('user-entry-action');
+        const backBtn = document.getElementById('btn-back-role');
+        const backBtnUser = document.getElementById('btn-back-role-user');
+
+        cardAdmin.addEventListener('click', () => {
+            roleSelection.classList.add('hidden');
+            adminForm.classList.remove('hidden');
+            document.getElementById('pin-input').focus();
+        });
+
+        // Account Selector Logic
+        function loadUserEmails() {
+            const select = document.getElementById('user-email-select');
+            fetch('/api/auth/users')
+                .then(res => res.json())
+                .then(data => {
+                    select.innerHTML = '<option value="">Choose an account...</option>';
+                    data.users.forEach(user => {
+                        const opt = document.createElement('option');
+                        opt.value = user.email;
+                        opt.textContent = `${user.name} (${user.email})`;
+                        select.appendChild(opt);
+                    });
+                });
+        }
+
+        cardUser.addEventListener('click', () => {
+            roleSelection.classList.add('hidden');
+            userAction.classList.remove('hidden');
+            loadUserEmails();
+        });
+
+        backBtn.addEventListener('click', () => {
+            adminForm.classList.add('hidden');
+            roleSelection.classList.remove('hidden');
+        });
+
+        backBtnUser.addEventListener('click', () => {
+            userAction.classList.add('hidden');
+            roleSelection.classList.remove('hidden');
+        });
+
+        // Toggle Login/Register
+        const loginView = document.getElementById('user-login-view');
+        const registerView = document.getElementById('user-register-view');
+        const showRegister = document.getElementById('link-show-register');
+        const showLogin = document.getElementById('link-show-login');
+
+        showRegister.addEventListener('click', () => {
+            loginView.classList.add('hidden');
+            registerView.classList.remove('hidden');
+        });
+
+        showLogin.addEventListener('click', () => {
+            registerView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+        });
+
+        // Submit Registration
+        const btnReg = document.getElementById('btn-submit-register');
+        btnReg.addEventListener('click', () => {
+            const fname = document.getElementById('reg-fname').value;
+            const lname = document.getElementById('reg-lname').value;
+            const email = document.getElementById('reg-email').value;
+            const phone = document.getElementById('reg-phone').value;
+            const errBox = document.getElementById('reg-error');
+
+            if(!fname || !lname || !email || !phone) {
+                errBox.innerText = "All fields are required.";
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            btnReg.disabled = true;
+            btnReg.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Joining...';
+
+            fetch('/api/user/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    first_name: fname,
+                    last_name: lname,
+                    email: email,
+                    phone: phone
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    alert("Welcome to Paytm! Your ₹5,000 bonus has been added. Please login using your email.");
+                    location.reload(); // Refresh to update dropdown
+                } else {
+                    errBox.innerText = data.error || "Registration failed.";
+                    errBox.classList.remove('hidden');
+                    btnReg.disabled = false;
+                    btnReg.innerHTML = 'Create Account & Get Bonus <i class="fa-solid fa-gift"></i>';
+                }
+            });
+        });
+
+        // Auto-show form if error occurs
+        {% if error %}
+            roleSelection.classList.add('hidden');
+            {% if request.form.get('role') == 'admin' %}
+                adminForm.classList.remove('hidden');
+            {% else %}
+                userAction.classList.remove('hidden');
+                loadUserEmails();
+            {% endif %}
+        {% endif %}
+    </script>
+</body>
+</html>

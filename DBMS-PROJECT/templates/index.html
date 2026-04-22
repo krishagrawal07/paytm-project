@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paytm Administrator Dashboard</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- App CSS -->
+    <link rel="stylesheet" href="/static/css/app.css">
+    <script>
+        window.initialRole = "{{ session.get('role', 'admin') }}";
+    </script>
+</head>
+<body>
+    
+    <!-- Top Navigation Bar -->
+    <header class="paytm-top-nav">
+        <div class="nav-left">
+            <div class="paytm-logo">
+                <span class="pay">Pay</span><span class="tm">tm</span>
+                <div class="version-tag" id="mode-badge">Admin View</div>
+            </div>
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search transactions, users, or reports...">
+            </div>
+        </div>
+        <div class="nav-right">
+            <!-- Admin Specific Tools -->
+            <div id="nav-admin-tools" style="display: flex; gap: 12px; align-items: center;">
+                <button class="btn-primary" id="refresh-db-btn"><i class="fa-solid fa-rotate-right"></i> Refresh Live Data</button>
+            </div>
+
+            <!-- User Specific Tools -->
+            <div id="nav-user-tools" class="hidden" style="display: flex; gap: 12px; align-items: center;">
+                <a href="/logout" class="btn-mode" style="text-decoration: none;"><i class="fa-solid fa-power-off"></i> Logout</a>
+            </div>
+            
+            <div class="top-nav-icons" style="display: flex; align-items: center; gap: 16px;">
+                <div class="nav-icon" id="btn-notifications" title="Notifications" style="position: relative;">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="badge" id="notif-badge" style="position: absolute; top:-4px; right:-4px; background:var(--danger); color:#fff; font-size:10px; padding:2px 4px; border-radius:10px; font-weight:bold;">3</span>
+                </div>
+            </div>
+
+            <div class="profile-dropdown">
+                <div class="avatar" id="header-avatar">SA</div>
+                <span id="header-profile-name">Super Admin <i class="fa-solid fa-chevron-down"></i></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="paytm-sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-group-title">MAIN MENU</div>
+                <ul>
+                    <li class="active" id="nav-dashboard">
+                        <a href="#"><i class="fa-solid fa-chart-pie"></i> Business Overview</a>
+                    </li>
+                    <li id="nav-users">
+                        <a href="#"><i class="fa-solid fa-users"></i> Users Setup</a>
+                    </li>
+                    <li id="nav-merchants">
+                        <a href="#"><i class="fa-solid fa-store"></i> Merchant Network</a>
+                    </li>
+                    <li id="nav-transactions">
+                        <a href="#"><i class="fa-solid fa-arrow-right-arrow-left"></i> Live Transactions</a>
+                    </li>
+                    
+                    <div class="nav-divider"></div>
+                    <div class="nav-group-title">ACADEMIC ASSIGNMENT</div>
+
+                    <li id="nav-case-study">
+                        <a href="#"><i class="fa-solid fa-file-contract"></i> Case Study Reports</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-bottom">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm Logo Secure" height="20">
+                <p>Secured via AES 256</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="paytm-main">
+            <!-- Dynamic Page Header -->
+            <div class="page-header">
+                <div class="page-title">
+                    <h1 id="page-title-h1">Business Overview</h1>
+                    <p id="page-title-p">Real-time macro analytics for your Paytm ecosystem.</p>
+                </div>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="error-banner" class="paytm-alert hidden">
+                <div class="alert-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+                <div class="alert-content">
+                    <h3 id="error-message">Database Connection Failed</h3>
+                    <p>Make sure the MySQL server is running and setup scripts are loaded.</p>
+                </div>
+            </div>
+
+            <!-- View 1: Main Business Overview -->
+            <div id="view-dashboard">
+                <!-- Top Metric Cards -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="m-icon bg-blue-light"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                        <div class="m-data">
+                            <p>Total Processed Volume</p>
+                            <h3 id="kpi-volume">₹0.00</h3>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="m-icon bg-green-light"><i class="fa-solid fa-users"></i></div>
+                        <div class="m-data">
+                            <p>Active Users</p>
+                            <h3 id="kpi-users">0</h3>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="m-icon bg-purple-light"><i class="fa-solid fa-store"></i></div>
+                        <div class="m-data">
+                            <p>Registered Merchants</p>
+                            <h3 id="kpi-merchants">0</h3>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="m-icon bg-orange-light"><i class="fa-solid fa-percent"></i></div>
+                        <div class="m-data">
+                            <p>Est. Core Revenue (2%)</p>
+                            <h3 id="kpi-revenue">₹0.00</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-split">
+                    <!-- Chart Section -->
+                    <div class="chart-container box-card">
+                        <div class="box-header">
+                            <h3>Transaction Volume Timeline</h3>
+                            <button class="btn-icon"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="volumeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recent Ledger -->
+                    <div class="ledger-container box-card">
+                        <div class="box-header">
+                            <h3>Recent Ledger</h3>
+                            <span class="view-all">View All</span>
+                        </div>
+                        <div class="ledger-list-wrapper">
+                            <ul id="recent-ledger-list" class="ledger-list">
+                                <!-- Injected via JS -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- View 2: Case Study Reports -->
+            <div id="view-case-study" class="hidden">
+                <div class="view-heading">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <h2>Academic Queries</h2>
+                        <span class="heading-tag">10 Assignments</span>
+                    </div>
+                    <button id="btn-toggle-dev-panel" class="btn-primary" style="background: var(--paytm-dark-blue);">
+                        <i class="fa-solid fa-code"></i> Developer Mode
+                    </button>
+                </div>
+
+                <section class="queries-grid">
+                    <div class="query-card" data-query="1">
+                        <div class="card-info"><h4>> 10 Transactions</h4><p>Q1 • Find Power Users</p></div>
+                    </div>
+                    <div class="query-card" data-query="2">
+                        <div class="card-info"><h4>Active Payers</h4><p>Q2 • At least 1 payment</p></div>
+                    </div>
+                    <div class="query-card" data-query="3">
+                        <div class="card-info"><h4>Amazon Txns 2023</h4><p>Q3 • Filter by merchant/year</p></div>
+                    </div>
+                    <div class="query-card" data-query="4">
+                        <div class="card-info"><h4>Emails & Txn IDs</h4><p>Q4 • Join tracking</p></div>
+                    </div>
+                    <div class="query-card" data-query="5">
+                        <div class="card-info"><h4>Dead Merchants</h4><p>Q5 • Left Join nulls</p></div>
+                    </div>
+                    <div class="query-card" data-query="6">
+                        <div class="card-info"><h4>Zomato Payments</h4><p>Q6 • Filtering users</p></div>
+                    </div>
+                    <div class="query-card" data-query="7">
+                        <div class="card-info"><h4>E-commerce Users</h4><p>Q7 • Category joins</p></div>
+                    </div>
+                    <div class="query-card" data-query="8">
+                        <div class="card-info"><h4>Highest Avg Value</h4><p>Q8 • Aggregation max</p></div>
+                    </div>
+                    <div class="query-card" data-query="9">
+                        <div class="card-info"><h4>Power Users (>5)</h4><p>Q9 • Payment counts</p></div>
+                    </div>
+                    <div class="query-card" data-query="10">
+                        <div class="card-info"><h4>2% Commission</h4><p>Q10 • Math operators</p></div>
+                    </div>
+            </section>
+            </div>
+
+
+            <!-- Global Results Table -->
+            <section class="results-section hidden box-card" id="results-container">
+                <div class="results-header">
+                    <div>
+                        <h2 id="table-heading-title">Data Output Table</h2>
+                        <div class="sql-box">
+                            <code id="query-sql-display"></code>
+                        </div>
+                    </div>
+                    <div class="results-actions">
+                        <button id="btn-refresh-query" class="btn-primary hidden" style="background:#0284c7;"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                        <button id="btn-add-record" class="btn-primary hidden"><i class="fa-solid fa-plus"></i> Add Record</button>
+                        <button id="btn-export-csv" class="btn-primary hidden" style="background:#10b981;"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+                        <button class="btn-icon" id="close-report"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="results-table" class="paytm-table">
+                        <thead><tr id="table-head-row"></tr></thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            
+        </main>
+    </div>
+
+    <!-- Profile Modal (Hidden) -->
+    <div id="profile-modal" class="hidden" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,0.6); z-index:999; display:flex; justify-content:center; align-items:center;">
+        <div style="background:#fff; width:600px; max-height:80vh; overflow-y:auto; padding:32px; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,0.15);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="width:60px; height:60px; border-radius:30px; background:#e0f2fe; color:#0284c7; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:bold;" id="pm-initials">U</div>
+                    <div>
+                        <h3 id="pm-name" style="margin:0; font-size:24px; color:#0f172a;">User Name</h3>
+                        <p id="pm-email" style="margin:4px 0 0; color:#64748b;">email@example.com</p>
+                    </div>
+                </div>
+                <button type="button" id="close-profile-modal" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+                <div style="background:#f8fafc; padding:16px; border-radius:8px;">
+                    <p style="margin:0; font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Phone</p>
+                    <p id="pm-phone" style="margin:4px 0 0; color:#0f172a; font-weight:500;">-</p>
+                </div>
+                <div style="background:#f8fafc; padding:16px; border-radius:8px;">
+                    <p style="margin:0; font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Address</p>
+                    <p id="pm-address" style="margin:4px 0 0; color:#0f172a; font-weight:500;">-</p>
+                </div>
+                <div style="background:#f8fafc; padding:16px; border-radius:8px;">
+                    <p style="margin:0; font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Total Transactions</p>
+                    <p id="pm-tx-count" style="margin:4px 0 0; color:#0284c7; font-weight:700; font-size:18px;">0</p>
+                </div>
+                <div style="background:#f8fafc; padding:16px; border-radius:8px;">
+                    <p style="margin:0; font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Total Spent</p>
+                    <p id="pm-tx-spent" style="margin:4px 0 0; color:#10b981; font-weight:700; font-size:18px;">₹0.00</p>
+                </div>
+            </div>
+
+            <h4 style="margin:0 0 12px; color:#0f172a; font-size:16px;">Recent Transactions</h4>
+            <div style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                <table class="paytm-table" style="margin:0; border-bottom:none;">
+                    <thead><tr><th>Date</th><th>Merchant</th><th>Status</th><th style="text-align:right;">Amount</th></tr></thead>
+                    <tbody id="pm-tx-body">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+                <button type="button" id="pm-close-btn" style="padding:10px 18px; border:none; background:#f1f5f9; color:#475569; border-radius:8px; cursor:pointer; font-weight:600;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CRUD Form Modal (Hidden) -->
+    <div id="crud-modal" class="hidden" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,0.6); z-index:999; display:flex; justify-content:center; align-items:center;">
+        <div style="background:#fff; width:480px; padding:32px; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,0.15);">
+            <h3 id="modal-title" style="margin-bottom:20px; font-size:20px; color:#0f172a;">Add New Entity</h3>
+            <form id="crud-form" style="display:flex; flex-direction:column; gap:16px;">
+                <!-- Dynamically injected by JS -->
+            </form>
+            <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+                <button type="button" id="modal-cancel" style="padding:10px 18px; border:none; background:#f1f5f9; color:#475569; border-radius:8px; cursor:pointer; font-weight:600;">Cancel</button>
+                <button type="button" id="modal-submit" style="padding:10px 18px; border:none; background:#00BAF2; color:#fff; border-radius:8px; cursor:pointer; font-weight:600;">Insert Record</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Drawer -->
+    <div id="profile-overlay" class="hidden">
+        <div class="profile-drawer">
+            <div class="drawer-header" style="background: var(--paytm-blue); color: #fff; border:none; padding: 32px 24px;">
+                <div style="display:flex; justify-content: space-between; align-items: flex-start; width:100%;">
+                    <div>
+                        <div class="avatar" style="width:70px; height:70px; border-radius:50%; overflow:hidden; border:2px solid #fff; margin-bottom:16px;">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200" alt="Profile" id="side-profile-img" style="width:100%; height:100%; object-fit:cover;">
+                        </div>
+                        <h3 style="color:#fff; margin:0; font-size:20px;" id="side-name">Super Admin</h3>
+                        <p style="color:#fff; opacity:0.8; font-size:13px; margin:4px 0 0;" id="side-phone">+91 0000000000</p>
+                    </div>
+                    <button class="btn-close-drawer" id="close-profile" style="color:#fff;"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div class="drawer-content" style="padding:0; flex:1; overflow-y:auto;">
+                <!-- Role: ADMIN STATUS HEADER -->
+                <div id="side-header-admin" style="padding:24px; border-bottom:8px solid #f1f5f9;">
+                    <div style="background:#f8fafc; border:1px solid var(--border-light); border-radius:16px; padding:20px;">
+                        <p style="font-size:11px; font-weight:800; color:#64748b; margin-bottom:12px;">SYSTEM STATUS</p>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span style="font-size:13px; color:var(--text-secondary);">Server Load</span>
+                            <span style="font-size:13px; font-weight:600; color:#10b981;">Optimal</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span style="font-size:13px; color:var(--text-secondary);">Daily Ledger</span>
+                            <span style="font-size:13px; font-weight:600; color:#10b981;">Synced</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="font-size:13px; color:var(--text-secondary);">API Health</span>
+                            <span style="font-size:13px; font-weight:600; color:#10b981;">100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Links (ADMIN) -->
+                <ul class="profile-menu" id="side-menu-admin">
+                    <li class="menu-item" id="side-menu-audit"><i class="fa-solid fa-list-check"></i> <span>System Audit Logs</span></li>
+                    <li class="menu-item" id="side-menu-health"><i class="fa-solid fa-heart-pulse"></i> <span>Database Health</span></li>
+                    <li class="menu-item" id="side-menu-config"><i class="fa-solid fa-gears"></i> <span>Platform Settings</span></li>
+                    <li class="menu-item" id="side-menu-security"><i class="fa-solid fa-shield-halved"></i> <span>Security Console</span></li>
+                    <div class="nav-divider" style="margin: 12px 24px;"></div>
+                    <li class="menu-item" style="color:#ef4444;" id="btn-side-logout-admin"><i class="fa-solid fa-power-off"></i> <span>Logout Securely</span></li>
+                </ul>
+
+                <!-- Admin Quick Stats (New) -->
+                <div style="padding: 24px; margin-top: auto;">
+                    <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 16px; padding: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                            <i class="fa-solid fa-triangle-exclamation" style="color: #d97706;"></i>
+                            <span style="font-size: 13px; font-weight: 700; color: #92400e;">Admin Security Tip</span>
+                        </div>
+                        <p style="font-size: 12px; color: #b45309; line-height: 1.5;">Regularly rotate your database access keys and monitor for unauthorized SQL injections.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="drawer-footer" style="padding:20px; text-align:center; font-size:12px; color:#94a3b8; border-top:1px solid #f1f5f9;">
+                Version 4.5.1 Prime
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Notification Drawer -->
+    <div id="notifications-overlay" class="hidden">
+        <div class="notification-drawer">
+            <div class="drawer-header">
+                <h3 id="notif-drawer-title">Notifications</h3>
+                <button class="btn-close-drawer" id="close-notifications"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <ul class="notification-list" id="global-notification-list">
+                <!-- Filled dynamically by JS -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+
+    <!-- SQL Developer Modal (Centered Pop-up) -->
+    <div class="modal-overlay" id="dev-panel-overlay">
+        <div class="modal-content">
+            <div class="box-header" style="margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; background: #f0f7ff; color: var(--paytm-blue); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;"><i class="fa-solid fa-terminal"></i></div>
+                    <div>
+                        <h3 style="margin:0;">SQL Developer Mode</h3>
+                        <p style="font-size: 11px; color: var(--text-secondary); margin:0;">Direct Query Console (paytm_db)</p>
+                    </div>
+                </div>
+                <button class="btn-icon" id="close-dev-panel"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <textarea id="custom-sql-input" placeholder="Enter SQL query (e.g. SELECT * FROM Transactions LIMIT 5)"></textarea>
+            
+            <div style="display: flex; gap: 16px;">
+                <button id="btn-execute-sql" class="btn-primary" style="flex: 1; justify-content: center; height: 50px; font-size: 15px;">
+                    <i class="fa-solid fa-play"></i> Run Query
+                </button>
+            </div>
+            <p style="text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 16px;">
+                <i class="fa-solid fa-circle-info"></i> Results will be displayed in the main output table.
+            </p>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
