@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paytm Business Administrator</title>
+    <!-- Google Fonts: Inter represents Paytm's clean sans-serif -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Authentic CSS -->
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+    
+    <!-- Top Navigation Bar (Authentic Paytm Style) -->
+    <header class="paytm-top-nav">
+        <div class="nav-left">
+            <div class="paytm-logo">
+                <span class="pay">Pay</span><span class="tm">tm</span>
+                <div class="version-tag">Admin</div>
+            </div>
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search transactions, users, or reports...">
+            </div>
+        </div>
+        <div class="nav-right">
+            <div id="db-status-badge" class="connection-status status-pending">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Connecting...
+            </div>
+            <div class="nav-icon"><i class="fa-regular fa-bell"></i></div>
+            <div class="nav-icon"><i class="fa-regular fa-circle-question"></i></div>
+            <div class="profile-dropdown">
+                <div class="avatar">SA</div>
+                <span>Sys Admin <i class="fa-solid fa-chevron-down"></i></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="paytm-sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-group-title">MAIN MENU</div>
+                <ul>
+                    <li class="active" id="nav-analytics">
+                        <a href="#"><i class="fa-solid fa-chart-line"></i> Dashboard Reports</a>
+                    </li>
+                    <li id="nav-users">
+                        <a href="#"><i class="fa-solid fa-users"></i> User Management</a>
+                    </li>
+                    <li id="nav-merchants">
+                        <a href="#"><i class="fa-solid fa-store"></i> Merchants</a>
+                    </li>
+                    <li id="nav-transactions">
+                        <a href="#"><i class="fa-solid fa-arrow-right-arrow-left"></i> Transactions</a>
+                    </li>
+                    
+                    <div class="nav-divider"></div>
+                    <div class="nav-group-title">ADMINISTRATION</div>
+
+                    <li id="nav-payments">
+                        <a href="#"><i class="fa-solid fa-credit-card"></i> Payment Gateways</a>
+                    </li>
+                    <li id="nav-security">
+                        <a href="#"><i class="fa-solid fa-shield-halved"></i> Security & Balances</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-bottom">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm Logo Secure" height="20">
+                <p>Secured via AES 256</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="paytm-main">
+            <!-- Dynamic Page Header -->
+            <div class="page-header">
+                <div class="page-title">
+                    <h1 id="page-title-h1" class="page-title h1">Business Insights</h1>
+                    <p id="page-title-p" class="page-title p">Generate Case Study reports and analyze platform flow.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-secondary"><i class="fa-solid fa-download"></i> Export Data</button>
+                    <button class="btn-primary"><i class="fa-solid fa-plus"></i> New Report</button>
+                </div>
+            </div>
+
+            <!-- Error Banner (Hidden by default) -->
+            <div id="error-banner" class="paytm-alert hidden">
+                <div class="alert-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+                <div class="alert-content">
+                    <h3 id="error-message">Database Connection Error</h3>
+                    <p class="alert-instructions">
+                        Execute the <code>paytm_db_setup.sql</code> script in your MySQL local server environment.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Analytics/Reports Hub -->
+            <div id="analytics-view">
+                
+                <!-- Quick Metric Cards -->
+                <div class="metrics-row hidden">
+                    <!-- We can add metrics later if needed, but grid goes here -->
+                </div>
+
+                <div class="section-heading">
+                    <h2>Case Study Requirements</h2>
+                    <span class="heading-tag">10 Queries</span>
+                </div>
+
+                <!-- Queries Grid -->
+                <section class="queries-grid">
+                    <div class="query-card" data-query="1">
+                        <div class="card-icon"><i class="fa-solid fa-user-plus"></i></div>
+                        <div class="card-info">
+                            <h4>> 10 Transactions</h4>
+                            <p>Query 1</p>
+                        </div>
+                    </div>
+                    <div class="query-card" data-query="2">
+                        <div class="card-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                        <div class="card-info">
+                            <h4>Active Payers</h4>
+                            <p>Query 2</p>
+                        </div>
+                    </div>
+                    <div class="query-card" data-query="3">
+                        <div class="card-icon"><i class="fa-brands fa-amazon"></i></div>
+                        <div class="card-info">
+                            <h4>Amazon Txns 2023</h4>
+                            <p>Query 3</p>
+                        </div>
+                    </div>
+                    <div class="query-card" data-query="4">
+                        <div class="card-icon"><i class="fa-regular fa-envelope"></i></div>
+                        <div class="card-info">
+                            <h4>Emails & Txn IDs</h4>
+                            <p>Query 4</p>
+                        </div>
+                    </div>
+                    <div class="query-card" data-query="5">
+                        <div class="card-icon"><i class="fa-solid fa-store-slash"></i></div>
+                        <div class="card-info">
+                            <h4>Dead Merchants</h4>
+                            <p>Query 5</p>
+                        </div>
+                    </div>
+                    <div class="query-card" data-query="6">
+                        <div class="card-icon"><i class="fa-solid fa-pizza-slice"></i></div>
+                        <div class="card-info">
+                            <h4>Zomato Payments</h4>
+                            <p>Query 6</p>
+                        </div>
+                    </div>
+                    <div class="query-card" data-query="7">
+                        <div class="card-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                        <div class="card-info">
+                            <h4>E-commerce Users</h4>
+                            <p>Query 7</p>
+                        </div>
+                    </div>
+                    <div class="query-card" data-query="8">
+                        <div class="card-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                        <div class="card-info">
+                            <h4>Highest Avg Value</h4>
+                            <p>Query 8</p>
+                        </div>
+                    </div>
+                    <div class="query-card" data-query="9">
+                        <div class="card-icon"><i class="fa-solid fa-chess-king"></i></div>
+                        <div class="card-info">
+                            <h4>Power Users (>5)</h4>
+                            <p>Query 9</p>
+                        </div>
+                    </div>
+                    <div class="query-card" data-query="10">
+                        <div class="card-icon"><i class="fa-solid fa-percent"></i></div>
+                        <div class="card-info">
+                            <h4>2% Commission</h4>
+                            <p>Query 10</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Results Section (Table View) -->
+            <section class="results-section hidden" id="results-container">
+                <div class="report-box">
+                    <div class="results-header">
+                        <h2>Data Output</h2>
+                        <div class="sql-box">
+                            <span class="sql-label">EXECUTED SQL</span>
+                            <code id="query-sql-display"></code>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="results-table" class="paytm-table">
+                            <thead>
+                                <tr id="table-head-row"></tr>
+                            </thead>
+                            <tbody id="table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>
