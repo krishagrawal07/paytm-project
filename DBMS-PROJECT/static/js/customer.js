@@ -144,6 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    function openModal(id) {
+        const m = document.getElementById(id);
+        if(m) m.classList.add('active');
+    }
+
     function closeModals() {
         document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
     }
@@ -182,14 +187,152 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => showToast("Security Settings Updated Successfully!", "success"), 1500);
     });
 
-    // Sidebar Logic
+    // --- DASHBOARD BALANCE CARD TRIGGERS ---
+    document.getElementById('trigger-add-money')?.addEventListener('click', () => openModal('modal-add-money'));
+    document.getElementById('trigger-p2p')?.addEventListener('click', () => openModal('modal-p2p'));
+    document.getElementById('trigger-my-qr')?.addEventListener('click', () => openDrawer('profile-overlay'));
+    document.getElementById('trigger-pay')?.addEventListener('click', () => {
+        openModal('modal-pay');
+        fetch('/api/table/Merchants').then(res => res.json()).then(data => {
+            const select = document.getElementById('payment-merchant-id');
+            if(select) select.innerHTML = data.data.map(m => `<option value="${m.merchant_id}">${m.name} (${m.category})</option>`).join('');
+        });
+    });
+
+    // --- SERVICE GRID ACTIONS ---
+    document.querySelectorAll('.service-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const modalId = item.getAttribute('data-modal');
+            const billType = item.getAttribute('data-bill');
+            
+            if(modalId) {
+                openModal(modalId);
+            } else if(billType) {
+                setupBillModal(billType);
+                openModal('modal-bill');
+            } else if(item.id === 'svc-self') {
+                openModal('modal-add-money');
+            } else if(item.id === 'svc-bank') {
+                showToast("Transfer to Bank Account coming soon!", "info");
+            }
+        });
+    });
+
+    function setupBillModal(type) {
+        const title = document.getElementById('bill-modal-title');
+        const cat = document.getElementById('bill-category');
+        const groupPhone = document.getElementById('group-recharge-phone');
+        const groupBill = document.getElementById('group-bill-id');
+        const labelBill = document.getElementById('bill-id-label');
+        const provider = document.getElementById('bill-provider');
+
+        cat.value = type;
+        groupPhone.classList.add('hidden');
+        groupBill.classList.add('hidden');
+
+        const providers = {
+            recharge: ["Airtel", "Jio", "Vi", "BSNL"],
+            electricity: ["Adani Electricity", "Tata Power", "MSEB", "BESCOM"],
+            dth: ["Tata Play", "Airtel Digital TV", "Dish TV", "Videocon d2h"],
+            gas: ["Indane Gas", "HP Gas", "Bharat Gas", "Mahanagar Gas"]
+        };
+
+        provider.innerHTML = (providers[type] || []).map(p => `<option>${p}</option>`).join('');
+
+        if(type === 'recharge') {
+            title.innerText = "Mobile Recharge";
+            groupPhone.classList.remove('hidden');
+        } else {
+            title.innerText = type.charAt(0).toUpperCase() + type.slice(1) + " Bill";
+            groupBill.classList.remove('hidden');
+            labelBill.innerText = type === 'electricity' ? 'CONSUMER NUMBER' : (type === 'dth' ? 'SMART CARD ID' : 'GAS CONNECTION ID');
+        }
+    }
+
+    document.getElementById('btn-submit-bill')?.addEventListener('click', () => {
+        const type = document.getElementById('bill-category').value;
+        const amt = document.getElementById('bill-amount').value;
+        const prov = document.getElementById('bill-provider').value;
+        if(!amt) return showToast("Enter amount", "error");
+
+        fetch('/api/user/bill-pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, category: type, provider: prov, amount: amt })
+        }).then(res => res.json()).then(data => {
+            if(data.success) { showToast(`${type.toUpperCase()} Success!`, "success"); closeModals(); loadDashboard(); }
+            else showToast(data.error, "error");
+        });
+    });
+
+    // P2P Find Recipient
+    document.getElementById('btn-find-recipient')?.addEventListener('click', () => {
+        const phone = document.getElementById('p2p-phone').value;
+        fetch(`/api/user/find?phone=${phone}`)
+            .then(res => res.json())
+            .then(data => {
+                const box = document.getElementById('p2p-recipient-box');
+                if(data.user) {
+                    document.getElementById('p2p-recipient-name').innerText = data.user.name;
+                    box.classList.remove('hidden');
+                } else {
+                    showToast("User not found", "error");
+                    box.classList.add('hidden');
+                }
+            });
+    });
+
+    // P2P Send Money
+    document.getElementById('btn-p2p-now')?.addEventListener('click', () => {
+        const phone = document.getElementById('p2p-phone').value;
+        const amt = document.getElementById('p2p-amount').value;
+        fetch('/api/user/p2p', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sender_id: userId, recipient_phone: phone, amount: amt })
+        }).then(res => res.json()).then(data => {
+            if(data.success) { showToast("Transfer Successful!", "success"); closeModals(); loadDashboard(); }
+            else showToast(data.error, "error");
+        });
+    });
+
+    // Add Money
+    document.getElementById('btn-add-money-now')?.addEventListener('click', () => {
+        const amt = document.getElementById('add-money-amount').value;
+        fetch('/api/user/add-money', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, amount: amt })
+        }).then(res => res.json()).then(data => {
+            if(data.success) { showToast("Money Added to Wallet!", "success"); closeModals(); loadDashboard(); }
+            else showToast(data.error, "error");
+        });
+    });
+
+    // Merchant Pay
+    document.getElementById('btn-pay-now')?.addEventListener('click', () => {
+        const mid = document.getElementById('payment-merchant-id').value;
+        const amt = document.getElementById('payment-amount').value;
+        fetch('/api/user/pay-merchant', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, merchant_id: mid, amount: amt })
+        }).then(res => res.json()).then(data => {
+            if(data.success) { showToast("Payment Successful!", "success"); closeModals(); loadDashboard(); }
+            else showToast(data.error, "error");
+        });
+    });
+
+    // --- NAVIGATION & SIDEBAR ---
     document.querySelectorAll('.sidebar-menu .menu-item').forEach(item => {
         item.addEventListener('click', () => {
-            if(item.id === 'sidebar-help') return openDrawer('help-overlay');
-            if(item.id === 'sidebar-wallet') return switchView('dashboard');
-            if(item.id === 'sidebar-passbook') return switchView('passbook');
-            if(item.id === 'sidebar-bank') return switchView('bank');
-            if(item.getAttribute('data-view') === 'home') return switchView('dashboard');
+            const viewId = item.getAttribute('data-view');
+            const sid = item.id;
+
+            if(sid === 'sidebar-help') { openDrawer('help-overlay'); return; }
+            if(sid === 'sidebar-wallet' || viewId === 'home') { switchView('dashboard'); return; }
+            if(sid === 'sidebar-passbook') { switchView('passbook'); return; }
+            if(sid === 'sidebar-bank') { switchView('bank'); return; }
         });
     });
 
